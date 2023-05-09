@@ -19,7 +19,7 @@ def save_data(data_list: list):
     '''
     timestamp = datetime.now().strftime('%d-%m-%y %H-%M-%S')
     fieldnames = list(data_list[0].keys())
-    with open(fr'{config.DATAPATH}{label} {timestamp}', 'w', newline='') as csv_file:
+    with open(fr'{config.DATAPATH}{label} {timestamp}.csv', 'w', newline='') as csv_file:
         writer = csv.DictWriter(f=csv_file, fieldnames=fieldnames)
         writer.writeheader()
         writer.writerows(data_list)
