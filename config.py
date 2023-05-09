@@ -1,0 +1,5 @@
+DATAPATH = 'data/'
+DATA_LIMIT = 5000
+
+# DIPPID Values
+PORT = 5700
