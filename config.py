@@ -1,5 +1,7 @@
+'''
+This module stores defaults values for application
+'''
 DATAPATH = 'data/'
-DATA_LIMIT = 5000
 
 # DIPPID Values
 PORT = 5700
