@@ -67,7 +67,7 @@ if __name__ == '__main__':
                 label = 'shaking'
                 time.sleep(1)
             elif sensor.get_value('button_3') and not is_gathering_data:
-                print("Start recording...\nGathering standing data")
+                print("Start recording...\nGathering lying data")
                 is_gathering_data = True
                 label = 'lying'
                 time.sleep(1)
