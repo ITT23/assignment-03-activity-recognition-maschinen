@@ -12,6 +12,7 @@ is_gathering_data = False
 sensor = SensorUDP(config.PORT)
 label = ''
 data_list = []
+last_row = {}
 
 def save_data(data_list: list):
     '''
@@ -28,8 +29,10 @@ def process_data(acc: Dict[str, Dict[str, float]], gyr: Dict[str, Dict[str, floa
     '''
     Transforms data input to Dict and appends it to data list
     '''
-    timestamp = datetime.now()
-    dict_row ={'label': label, 'timestamp': timestamp}
+    global last_row
+
+    timestamp = time.time()
+    dict_row = {}
     dict_row['acc_x'] = acc['x']
     dict_row['acc_y'] = acc['y']
     dict_row['acc_z'] = acc['z']
@@ -41,8 +44,14 @@ def process_data(acc: Dict[str, Dict[str, float]], gyr: Dict[str, Dict[str, floa
     dict_row['grav_x'] = grav['x']
     dict_row['grav_y'] = grav['y']
     dict_row['grav_z'] = grav['z']
+    
+    if not last_row or last_row != dict_row:
+        last_row = dict_row.copy()
+        dict_row['label'] = label
+        dict_row['timestamp'] = timestamp
+        data_list.append(dict_row.copy())
+        dict_row.clear()
 
-    data_list.append(dict_row)
 
 if __name__ == '__main__':
     while True:
@@ -57,18 +66,21 @@ if __name__ == '__main__':
                 is_gathering_data = True
                 label = 'shaking'
                 time.sleep(1)
-            elif sensor.get_value('button_2') and not is_gathering_data:
+            elif sensor.get_value('button_3') and not is_gathering_data:
                 print("Start recording...\nGathering standing data")
                 is_gathering_data = True
-                label = 'standing'
+                label = 'lying'
                 time.sleep(1)
-            if is_gathering_data:
-                if sensor.get_value('button_1') == 1 or sensor.get_value('button_2') == 1 or sensor.get_value('button_3') == 1:
+            elif is_gathering_data:
+                if sensor.get_value('button_1') or sensor.get_value('button_2') or sensor.get_value('button_3'):
                     print("Recording stopped.")
                     is_gathering_data = False
                     save_data(data_list)
-                    data_list = []
-                accelerometer_data = sensor.get_value('accelerometer')
-                gyroscope_data = sensor.get_value('gyroscope')
-                gravity_data = sensor.get_value('gravity')
-                process_data(accelerometer_data, gyroscope_data, gravity_data)
+                    data_list.clear()
+                    last_row.clear()
+                    time.sleep(1)
+                else:
+                    accelerometer_data = sensor.get_value('accelerometer')
+                    gyroscope_data = sensor.get_value('gyroscope')
+                    gravity_data = sensor.get_value('gravity')
+                    process_data(accelerometer_data, gyroscope_data, gravity_data)
