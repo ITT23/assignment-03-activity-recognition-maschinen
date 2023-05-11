@@ -14,16 +14,18 @@ label = ''
 data_list = []
 last_row = {}
 
+
 def save_data(data_list: list):
     '''
     Transform data list to csv file
     '''
     timestamp = datetime.now().strftime('%d-%m-%y %H-%M-%S')
     fieldnames = list(data_list[0].keys())
-    with open(fr'{config.DATAPATH}{label} {timestamp}.csv', 'w', newline='') as csv_file:
+    with open(fr'{config.DATAPATH}{label} {timestamp}.csv', 'w', newline='', encoding='utf-8') as csv_file:
         writer = csv.DictWriter(f=csv_file, fieldnames=fieldnames)
         writer.writeheader()
         writer.writerows(data_list)
+
 
 def process_data(acc: Dict[str, Dict[str, float]], gyr: Dict[str, Dict[str, float]], grav: Dict[str, Dict[str, float]]):
     '''
@@ -44,7 +46,7 @@ def process_data(acc: Dict[str, Dict[str, float]], gyr: Dict[str, Dict[str, floa
     dict_row['grav_x'] = grav['x']
     dict_row['grav_y'] = grav['y']
     dict_row['grav_z'] = grav['z']
-    
+
     if not last_row or last_row != dict_row:
         last_row = dict_row.copy()
         dict_row['label'] = label
@@ -59,17 +61,17 @@ if __name__ == '__main__':
             if sensor.get_value('button_1') and not is_gathering_data:
                 print("Start recording...\nGathering waving data")
                 is_gathering_data = True
-                label = 'waving'
+                label = config.ActivityType.WAVING
                 time.sleep(1)
             elif sensor.get_value('button_2') and not is_gathering_data:
                 print("Start recording...\nGathering shaking data")
                 is_gathering_data = True
-                label = 'shaking'
+                label = config.ActivityType.SHAKING
                 time.sleep(1)
             elif sensor.get_value('button_3') and not is_gathering_data:
                 print("Start recording...\nGathering lying data")
                 is_gathering_data = True
-                label = 'lying'
+                label = config.ActivityType.LYING
                 time.sleep(1)
             elif is_gathering_data:
                 if sensor.get_value('button_1') or sensor.get_value('button_2') or sensor.get_value('button_3'):
@@ -83,4 +85,5 @@ if __name__ == '__main__':
                     accelerometer_data = sensor.get_value('accelerometer')
                     gyroscope_data = sensor.get_value('gyroscope')
                     gravity_data = sensor.get_value('gravity')
-                    process_data(accelerometer_data, gyroscope_data, gravity_data)
+                    process_data(accelerometer_data,
+                                 gyroscope_data, gravity_data)
