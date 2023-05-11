@@ -1,4 +1,3 @@
-from sklearn import svm
 import pyglet
 import sys
 import config
@@ -13,10 +12,9 @@ sensor = SensorUDP(config.PORT)
 window = pyglet.window.Window(width=WINDOW_WIDTH, height=WINDOW_HEIGHT)
 pyglet.gl.glClearColor(0.1, 0.6, 0.2, 0)
 
-classifier = svm.SVC(kernel='linear')
-trainer = Trainer(classifier)
+trainer = Trainer()
 trainer.train()
-visualizer = Visualizer(classifier)
+visualizer = Visualizer(trainer.classifier)
 
 
 @window.event

@@ -19,13 +19,13 @@ class Visualizer:
         self.counter = 0
 
     def handle_prediction(self, prediction):
-        if prediction == config.LYING:
+        if prediction == config.ActivityType.LYING:
             print('lying')
             self.visualization_sprite.image = self.lying_img
-        elif prediction == config.WAVING:
+        elif prediction == config.ActivityType.WAVING:
             print('waving')
             self.visualization_sprite.image = self.waving_img
-        elif prediction == config.SHAKING:
+        elif prediction == config.ActivityType.SHAKING:
             print('shaking')
             self.visualization_sprite.image = self.shaking_img
 
