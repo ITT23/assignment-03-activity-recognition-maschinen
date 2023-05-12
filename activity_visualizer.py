@@ -13,26 +13,31 @@ class Visualizer:
     def __init__(self, classifier):
         self.recognizer = Recognizer(classifier)
         self.waving_img = pyglet.resource.image(os.path.normpath('assets/waving.png'))
-        self.lying_img = pyglet.resource.image(os.path.normpath('assets/lying.png.png'))
+        self.lying_img = pyglet.resource.image(os.path.normpath('assets/lying.png'))
         self.shaking_img = pyglet.resource.image(os.path.normpath('assets/shaking.png'))
         self.visualization_sprite = pyglet.sprite.Sprite(img=self.lying_img)
         self.counter = 0
 
     def handle_prediction(self, prediction):
-        if prediction == config.ActivityType.LYING:
+        print(prediction)
+        prediction = prediction[0]
+        if prediction == config.ActivityType.LYING.value:
             print('lying')
             self.visualization_sprite.image = self.lying_img
-        elif prediction == config.ActivityType.WAVING:
+        elif prediction == config.ActivityType.WAVING.value:
             print('waving')
             self.visualization_sprite.image = self.waving_img
-        elif prediction == config.ActivityType.SHAKING:
+        elif prediction == config.ActivityType.SHAKING.value:
             print('shaking')
             self.visualization_sprite.image = self.shaking_img
 
     def update(self, acc_data, gyr_data, grav_data):
+        #print("acc", acc_data)
+        #print("gyr", gyr_data)
+        #print("grav", grav_data)
         self.counter += 1
         self.recognizer.process_data(acc_data, gyr_data, grav_data)
-        if self.counter >= config.SAMPLING_RATE_INPUT * config.SAMPLING_LENGTH_INPUT:
+        if self.counter >= 60 * config.SAMPLING_LENGTH_INPUT:
             self.counter = 0
             prediction = self.recognizer.predict()
             self.handle_prediction(prediction)

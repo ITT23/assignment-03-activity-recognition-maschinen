@@ -85,5 +85,4 @@ if __name__ == '__main__':
                     accelerometer_data = sensor.get_value('accelerometer')
                     gyroscope_data = sensor.get_value('gyroscope')
                     gravity_data = sensor.get_value('gravity')
-                    process_data(accelerometer_data,
-                                 gyroscope_data, gravity_data)
+                    process_data(accelerometer_data, gyroscope_data, gravity_data)

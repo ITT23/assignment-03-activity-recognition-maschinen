@@ -6,6 +6,7 @@ from typing import Dict
 import config
 from scipy import signal
 import numpy as np
+import pandas as pd
 
 
 class Recognizer:
@@ -34,8 +35,11 @@ class Recognizer:
             self.last_row = dict_row.copy()
             self.data_list.append(dict_row.copy())
 
-    def predict(self, data):
+    def predict(self):
         parameters = []
+        data = pd.DataFrame(self.data_list)
+        print(data)
+
         for sensor in config.SENSOR_NAMES:
             data[sensor] = np.convolve(data[sensor], self.kernel, 'same')
             spectrum = np.abs(np.fft.fft(data[sensor]))
@@ -43,5 +47,6 @@ class Recognizer:
             mask = frequencies >= 0
             frequency = np.argmax(spectrum[mask] * config.SAMPLING_RATE) / config.SAMPLING_LENGTH_INPUT
             parameters.append(frequency)
-
-        return self.classifier.predict([parameters])
+        self.data_list.clear()
+        sum_sensors = sum(parameters)
+        return self.classifier.predict([[sum_sensors]])
