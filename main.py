@@ -13,7 +13,7 @@ window = pyglet.window.Window(width=WINDOW_WIDTH, height=WINDOW_HEIGHT)
 pyglet.gl.glClearColor(0.1, 0.6, 0.2, 0)
 
 trainer = Trainer()
-trainer.train()
+
 visualizer = Visualizer(trainer.classifier)
 
 
@@ -36,4 +36,6 @@ def on_key_press(symbol, modifiers):
 
 
 if __name__ == '__main__':
+    print("start")
+    trainer.train()
     pyglet.app.run()
