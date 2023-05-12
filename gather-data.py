@@ -10,7 +10,7 @@ import time
 
 is_gathering_data = False
 sensor = SensorUDP(config.PORT)
-label = ''
+label = 0
 data_list = []
 last_row = {}
 
@@ -21,7 +21,7 @@ def save_data(data_list: list):
     '''
     timestamp = datetime.now().strftime('%d-%m-%y %H-%M-%S')
     fieldnames = list(data_list[0].keys())
-    with open(fr'{config.DATAPATH}{label} {timestamp}.csv', 'w', newline='', encoding='utf-8') as csv_file:
+    with open(fr'{config.DATAPATH}{label.name} {timestamp}.csv', 'w', newline='', encoding='utf-8') as csv_file:
         writer = csv.DictWriter(f=csv_file, fieldnames=fieldnames)
         writer.writeheader()
         writer.writerows(data_list)
@@ -49,7 +49,7 @@ def process_data(acc: Dict[str, Dict[str, float]], gyr: Dict[str, Dict[str, floa
 
     if not last_row or last_row != dict_row:
         last_row = dict_row.copy()
-        dict_row['label'] = label
+        dict_row['label'] = label.value
         dict_row['timestamp'] = timestamp
         data_list.append(dict_row.copy())
         dict_row.clear()
