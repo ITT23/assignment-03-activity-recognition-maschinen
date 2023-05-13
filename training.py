@@ -25,9 +25,9 @@ class Trainer:
             file = os.path.join(config.DATAPATH, filename)
             if os.path.isfile(file):
                 dataframe = pd.read_csv(file)
-                splitted = self.split(dataframe)
-                for split in splitted:
-                    self.calc_frequencies(split)
+                split = self.split(dataframe)
+                for s in split:
+                    self.calc_frequencies(s)
         self.train_data = pd.DataFrame(self.train_data_list)
 
     def split(self, dataframe: pd.DataFrame):
@@ -53,7 +53,7 @@ class Trainer:
         # filter out very small values
         filtered_df = dataframe.copy()
         filtered_df[['acc_x', 'acc_y', 'acc_z', 'gyr_x', 'gyr_y', 'gyr_z', 'grav_x', 'grav_y', 'grav_z']] = filtered_df[
-            ['acc_x', 'acc_y', 'acc_z', 'gyr_x', 'gyr_y', 'gyr_z', 'grav_x', 'grav_y', 'grav_z']].clip(lower=0.05)
+            ['acc_x', 'acc_y', 'acc_z', 'gyr_x', 'gyr_y', 'gyr_z', 'grav_x', 'grav_y', 'grav_z']].clip(lower=config.THRESHOLD)
 
         # gaussian clean data
         kernel = signal.gaussian(10, 3)

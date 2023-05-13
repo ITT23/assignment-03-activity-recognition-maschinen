@@ -16,24 +16,23 @@ pyglet.gl.glClearColor(config.BACKGROUND_COLOR_R, config.BACKGROUND_COLOR_G, con
 
 @window.event
 def on_draw():
-    if window:
-        window.clear()
-        # fps_display.draw()
-        if sensor.get_capabilities():
-            if sensor.has_capability('accelerometer'):
-                accelerometer_data = sensor.get_value('accelerometer')
-            else:
-                return
-            if sensor.has_capability('gyroscope'):
-                gyroscope_data = sensor.get_value('gyroscope')
-            else:
-                return
-            if sensor.has_capability('gravity'):
-                gravity_data = sensor.get_value('gravity')
-            else:
-                return
-            visualizer.update(accelerometer_data, gyroscope_data, gravity_data)
-            visualizer.draw()
+    window.clear()
+    # fps_display.draw()
+    if sensor.get_capabilities():
+        if sensor.has_capability('accelerometer'):
+            accelerometer_data = sensor.get_value('accelerometer')
+        else:
+            return
+        if sensor.has_capability('gyroscope'):
+            gyroscope_data = sensor.get_value('gyroscope')
+        else:
+            return
+        if sensor.has_capability('gravity'):
+            gravity_data = sensor.get_value('gravity')
+        else:
+            return
+        visualizer.update(accelerometer_data, gyroscope_data, gravity_data)
+        visualizer.draw()
 
 
 @window.event
@@ -44,6 +43,5 @@ def on_key_press(symbol, modifiers):
 
 
 if __name__ == '__main__':
-
     visualizer = Visualizer(trainer.classifier)
     pyglet.app.run()

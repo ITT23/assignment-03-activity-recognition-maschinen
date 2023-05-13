@@ -49,12 +49,17 @@ class Recognizer:
         data = pd.DataFrame(self.data_list)
 
         for sensor in config.SENSOR_NAMES:
-            data[sensor] = np.convolve(data[sensor], self.kernel, 'same')
-            spectrum = np.abs(np.fft.fft(data[sensor]))
-            frequencies = np.fft.fftfreq(len(data[sensor]), 1 / config.SAMPLING_RATE)
-            mask = frequencies >= 0
-            frequency = np.argmax(spectrum[mask] * config.SAMPLING_RATE) / config.SAMPLING_LENGTH_INPUT
-            parameters.append(frequency)
+            if sensor in data:
+                try:
+                    data[sensor] = np.convolve(data[sensor], self.kernel, 'same')
+                    spectrum = np.abs(np.fft.fft(data[sensor]))
+                    frequencies = np.fft.fftfreq(len(data[sensor]), 1 / config.SAMPLING_RATE)
+                    mask = frequencies >= 0
+                    frequency = np.argmax(spectrum[mask] * config.SAMPLING_RATE) / config.SAMPLING_LENGTH_INPUT
+                    parameters.append(frequency)
+                except:
+                    print("WARNING: Check if your DIPPID device is still sending data!")
+                    continue
         self.data_list.clear()
         sum_sensors = sum(parameters)
         return self.classifier.predict([[sum_sensors]])

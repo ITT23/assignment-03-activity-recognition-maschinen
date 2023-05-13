@@ -27,6 +27,9 @@ PORT = 5700
 # approximate sampling rate in train data
 SAMPLING_RATE = 100
 
+# filter threshold
+THRESHOLD = 0.05
+
 # approximate frame rate of pyglet window is used as sampling rate for activity recognition
 # since the program reads sensor data on every update()-call
 SAMPLING_RATE_INPUT = 60
