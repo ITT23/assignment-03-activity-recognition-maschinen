@@ -30,7 +30,7 @@ class Trainer:
                     self.calc_frequencies(s)
         self.train_data = pd.DataFrame(self.train_data_list)
 
-    def split(self, dataframe):
+    def split(self, dataframe: pd.DataFrame):
         """
         cut first and last 0.5 seconds of every data set, then split every data set into 3
         :param dataframe: gathered dataset for one activity (~10 seconds)

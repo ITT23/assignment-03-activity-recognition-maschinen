@@ -24,7 +24,7 @@ class Visualizer:
         self.visualization_sprite.scale = 0.5
         self.counter = 0
 
-    def handle_prediction(self, prediction: int):
+    def handle_prediction(self, prediction: list):
         """
         show image matching to performed/predicted activity
         :param prediction: predicted label (0, 1, 2)
