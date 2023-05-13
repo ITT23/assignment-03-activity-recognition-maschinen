@@ -50,6 +50,7 @@ class Recognizer:
         """
         data = pd.DataFrame(self.data_list)
         sum_frequencies = 0
+        amplitude_acc_y = 0
         if 'acc_y' in data:
             amplitude_acc_y = data['acc_y'].max() - data['acc_y'].min()
         for sensor in config.SENSOR_NAMES:
