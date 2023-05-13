@@ -66,6 +66,4 @@ class Recognizer:
                     print("WARNING: Check if your DIPPID device is still sending data!")
                     continue
         self.data_list.clear()
-        print(sum_frequencies)
-        print(amplitude_acc_y)
         return self.classifier.predict([[sum_frequencies, amplitude_acc_y]])

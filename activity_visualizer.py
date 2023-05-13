@@ -7,6 +7,7 @@ import config
 from typing import Dict
 from activity_recognizer import Recognizer
 
+# img source question: https://www.pngegg.com/en/png-baaoe
 # img source waving: https://creazilla.com/nodes/46453-waving-hand-emoji-clipart
 # img source shaking: http://www.onlinewebfonts.com
 # img source lying: https://www.clipartmax.com/middle/m2H7d3N4d3m2d3A0_sleeping-stick-figure-clipart-lying-person-icon-png/
@@ -15,10 +16,12 @@ from activity_recognizer import Recognizer
 class Visualizer:
     def __init__(self, classifier):
         self.recognizer = Recognizer(classifier)
+        self.question_img = pyglet.resource.image(os.path.normpath('assets/question.png'))
         self.waving_img = pyglet.resource.image(os.path.normpath('assets/waving.png'))
         self.lying_img = pyglet.resource.image(os.path.normpath('assets/lying.png'))
         self.shaking_img = pyglet.resource.image(os.path.normpath('assets/shaking.png'))
-        self.visualization_sprite = pyglet.sprite.Sprite(img=self.lying_img)
+        self.visualization_sprite = pyglet.sprite.Sprite(img=self.question_img)
+        self.visualization_sprite.scale = 0.5
         self.counter = 0
 
     def handle_prediction(self, prediction: int):
@@ -30,12 +33,18 @@ class Visualizer:
         if prediction == config.ActivityType.LYING.value:
             print('lying')
             self.visualization_sprite.image = self.lying_img
+            self.visualization_sprite.scale = 0.75
         elif prediction == config.ActivityType.WAVING.value:
             print('waving')
             self.visualization_sprite.image = self.waving_img
+            self.visualization_sprite.scale = 0.35
         elif prediction == config.ActivityType.SHAKING.value:
             print('shaking')
             self.visualization_sprite.image = self.shaking_img
+            self.visualization_sprite.scale = 0.35
+        else:
+            self.visualization_sprite.image = self.question_img
+            self.visualization_sprite.scale = 0.5
 
     def update(self, acc_data: Dict[str, Dict[str, float]], gyr_data: Dict[str, Dict[str, float]], grav_data: Dict[str, Dict[str, float]]):
         """
@@ -53,4 +62,6 @@ class Visualizer:
             self.handle_prediction(prediction)
 
     def draw(self):
+        self.visualization_sprite.x = (config.WINDOW_WIDTH - self.visualization_sprite.width) / 2
+        self.visualization_sprite.y = (config.WINDOW_HEIGHT - self.visualization_sprite.height) / 2
         self.visualization_sprite.draw()

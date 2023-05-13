@@ -20,7 +20,7 @@ class Trainer:
         """
         read datat from csv and store it in one dataframe for training
         """
-        print("reading train data...")
+        print("Reading train data...")
         for filename in os.listdir(config.DATAPATH):
             file = os.path.join(config.DATAPATH, filename)
             if os.path.isfile(file):
@@ -90,11 +90,11 @@ class Trainer:
         fit linear and poly classifiers with frequency sums of training data
         :return: trained classifiers
         """
-        print("fit classifier on train data...")
+        print("Fitting classifier on train data...")
         classifier_linear = svm.SVC(kernel='linear')
         classifier_poly = svm.SVC(kernel='poly')
         # train linear and poly classifiers
-        x_train = self.train_data[['sum', 'amplitude_acc_y']]
+        x_train = self.train_data[['sum', 'amplitude_acc_y']].values
         classifier_linear.fit(x_train, self.train_data['label'])
         classifier_poly.fit(x_train, self.train_data['label'])
         return classifier_linear, classifier_poly
@@ -105,7 +105,7 @@ class Trainer:
         :param classifier_linear: trained linear classifier
         :param classifier_poly: trained poly classifier
         """
-        x_test = self.test_data[['sum', 'amplitude_acc_y']]
+        x_test = self.test_data[['sum', 'amplitude_acc_y']].values
         # run prediction on test data
         predictions_linear = classifier_linear.predict(x_test)
         predictions_poly = classifier_poly.predict(x_test)
@@ -126,4 +126,4 @@ class Trainer:
         self.split_train_test()
         classifier_linear, classifier_poly = self.fit_classifier()
         self.evaluate(classifier_linear, classifier_poly)
-        print("training done")
+        print("Training done, ready to predict:")

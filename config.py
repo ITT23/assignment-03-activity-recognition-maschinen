@@ -7,8 +7,8 @@ from enum import Enum
 DATAPATH = 'data/'
 SENSOR_NAMES = ['acc_x', 'acc_y', 'acc_z', 'gyr_x', 'gyr_y', 'gyr_z', 'grav_x', 'grav_y', 'grav_z']
 
-WINDOW_WIDTH = 900
-WINDOW_HEIGHT = 900
+WINDOW_WIDTH = 350
+WINDOW_HEIGHT = 300
 BACKGROUND_COLOR_R = 0.61176
 BACKGROUND_COLOR_G = 0
 BACKGROUND_COLOR_B = 0.29412
