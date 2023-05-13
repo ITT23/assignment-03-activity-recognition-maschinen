@@ -8,6 +8,8 @@ from training import Trainer
 trainer = Trainer()
 trainer.train()
 
+print(trainer.classifier)
+
 sensor = SensorUDP(config.PORT)
 window = pyglet.window.Window(width=config.WINDOW_WIDTH, height=config.WINDOW_HEIGHT)
 pyglet.gl.glClearColor(config.BACKGROUND_COLOR_R, config.BACKGROUND_COLOR_G, config.BACKGROUND_COLOR_B, config.BACKGROUND_COLOR_T)
