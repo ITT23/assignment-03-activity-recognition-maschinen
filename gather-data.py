@@ -15,10 +15,10 @@ data_list = []
 last_row = {}
 
 
-def save_data(data_list: list):
-    '''
+def save_data():
+    """
     Transform data list to csv file
-    '''
+    """
     timestamp = datetime.now().strftime('%d-%m-%y %H-%M-%S')
     fieldnames = list(data_list[0].keys())
     with open(fr'{config.DATAPATH}{label.name} {timestamp}.csv', 'w', newline='', encoding='utf-8') as csv_file:
@@ -28,9 +28,12 @@ def save_data(data_list: list):
 
 
 def process_data(acc: Dict[str, Dict[str, float]], gyr: Dict[str, Dict[str, float]], grav: Dict[str, Dict[str, float]]):
-    '''
-    Transforms data input to Dict and appends it to data list
-    '''
+    """
+    Transform data input to Dict and appends it to data list
+    :param acc: captured accelerometer data
+    :param gyr: captured gyroscope data
+    :param grav: captured gravity data
+    """
     global last_row
 
     timestamp = time.time()
@@ -47,6 +50,7 @@ def process_data(acc: Dict[str, Dict[str, float]], gyr: Dict[str, Dict[str, floa
     dict_row['grav_y'] = grav['y']
     dict_row['grav_z'] = grav['z']
 
+    # only gather data if it changed in comparison to last
     if not last_row or last_row != dict_row:
         last_row = dict_row.copy()
         dict_row['label'] = label.value
@@ -56,6 +60,10 @@ def process_data(acc: Dict[str, Dict[str, float]], gyr: Dict[str, Dict[str, floa
 
 
 if __name__ == '__main__':
+    '''
+    Start/stop data gathering by button press;
+    Store data in csv file when button is pressed again
+    '''
     while True:
         if sensor.get_capabilities:
             if sensor.get_value('button_1') and not is_gathering_data:
@@ -77,7 +85,7 @@ if __name__ == '__main__':
                 if sensor.get_value('button_1') or sensor.get_value('button_2') or sensor.get_value('button_3'):
                     print("Recording stopped.")
                     is_gathering_data = False
-                    save_data(data_list)
+                    save_data()
                     data_list.clear()
                     last_row.clear()
                     time.sleep(1)

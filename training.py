@@ -1,9 +1,11 @@
+"""
+this module trains and evaluates classifiers on gathered data
+"""
 import os
 import pandas as pd
 import config
 import numpy as np
 from scipy import signal
-
 from sklearn import model_selection, metrics, svm
 
 
@@ -15,8 +17,10 @@ class Trainer:
         self.train_data_list = []
 
     def read_data(self):
+        """
+        read datat from csv and store it in one dataframe for training
+        """
         print("reading train data...")
-        dataframes = []
         for filename in os.listdir(config.DATAPATH):
             file = os.path.join(config.DATAPATH, filename)
             if os.path.isfile(file):
@@ -25,79 +29,97 @@ class Trainer:
                 for split in splitted:
                     self.calc_frequencies(split)
         self.train_data = pd.DataFrame(self.train_data_list)
-        print(self.train_data)
 
-    def split(self, dataframe):
+    def split(self, dataframe: pd.DataFrame):
+        """
+        cut first and last 0.5 seconds of every data set, then split every data set into 3
+        :param dataframe: gathered dataset for one activity (~10 seconds)
+        :return: split dataframe
+        """
         cut_df = dataframe.copy()
         cut_df = cut_df[(cut_df['timestamp'] >= (cut_df['timestamp'].min() + 0.5)) & (
                 cut_df['timestamp'] <= (cut_df['timestamp'].max() - 0.5))]
-
-        print(cut_df)
         return np.array_split(cut_df, 3)
 
+    def calc_frequencies(self, dataframe: pd.DataFrame):
+        """
+        calculate frequencies for each sensor data and store it in a central dataframe
+        :param dataframe: gathered and split dataset for one activity (~3 seconds)
+        :return:
+        """
+        # determine exact sample length
+        sample_length = round(dataframe['timestamp'].max() - dataframe['timestamp'].min(), 4)
 
-    def calc_frequencies(self, dataframe):
-        print(dataframe)
-
-        SAMLPE_LENGTH = round(dataframe['timestamp'].max() - dataframe['timestamp'].min(), 4)
-
+        # filter out very small values
         filtered_df = dataframe.copy()
         filtered_df[['acc_x', 'acc_y', 'acc_z', 'gyr_x', 'gyr_y', 'gyr_z', 'grav_x', 'grav_y', 'grav_z']] = filtered_df[
             ['acc_x', 'acc_y', 'acc_z', 'gyr_x', 'gyr_y', 'gyr_z', 'grav_x', 'grav_y', 'grav_z']].clip(lower=0.05)
 
-        print(filtered_df)
-
+        # gaussian clean data
         kernel = signal.gaussian(10, 3)
         kernel /= np.sum(kernel)
-
         gaussian_df = filtered_df.copy()
         gaussian_df[['acc_x', 'acc_y', 'acc_z', 'gyr_x', 'gyr_y', 'gyr_z', 'grav_x', 'grav_y', 'grav_z']] = gaussian_df[
             ['acc_x', 'acc_y', 'acc_z', 'gyr_x', 'gyr_y', 'gyr_z', 'grav_x', 'grav_y', 'grav_z']].transform(
             lambda x: np.convolve(x, kernel, 'same'), raw=True)
 
-        print(gaussian_df)
-
         row = {}
         sum_sensors = 0
+        # calculate frequency for each sensor
         for sensor in config.SENSOR_NAMES:
             spectrum = np.abs(np.fft.fft(gaussian_df[sensor]))
             frequencies = np.fft.fftfreq(len(gaussian_df[sensor]), 1 / config.SAMPLING_RATE)
             mask = frequencies > 0
-            frequency = np.argmax(spectrum[mask] * config.SAMPLING_RATE) / SAMLPE_LENGTH
+            frequency = np.argmax(spectrum[mask] * config.SAMPLING_RATE) / sample_length
             row[sensor] = frequency
-            sum_sensors += frequency
+            sum_sensors += frequency  # calculate sum of all sensor frequencies
         row['label'] = gaussian_df['label'].values[1]
         row['sum'] = sum_sensors
-
         self.train_data_list.append(row)
 
     def split_train_test(self):
+        """
+        split training data into test and train to evaluate classifier
+        """
+        #todo check if gleichmäßiger split
         self.train_data, self.test_data = model_selection.train_test_split(self.train_data.copy())
         #self.test_data = self.train_data.copy()
 
     def fit_classifier(self):
+        """
+        fit lienar, poly and rbf classifiers with frequency sums of training data
+        :return: trained classifiers
+        """
         print("fit classifier on train data...")
         classifier_linear = svm.SVC(kernel='linear')
         classifier_poly = svm.SVC(kernel='poly')
         classifier_rbf = svm.SVC(kernel='rbf')
         # train all three classifiers
         #x_train = self.train_data[config.SENSOR_NAMES]
-        x_train = self.train_data[['sum']]
+        x_train = self.train_data[['sum']].values
         classifier_linear.fit(x_train, self.train_data['label'])
         classifier_poly.fit(x_train, self.train_data['label'])
         classifier_rbf.fit(x_train, self.train_data['label'])
         return classifier_linear, classifier_poly, classifier_rbf
 
     def evaluate(self, classifier_linear, classifier_poly, classifier_rbf):
+        """
+        evaluate linear, poly and rbf classifiers
+        :param classifier_linear: trained linear classifier
+        :param classifier_poly: trained poly classifier
+        :param classifier_rbf: trained rbf classifier
+        """
         #x_test = self.test_data[config.SENSOR_NAMES]
-        x_test = self.test_data[['sum']]
+        x_test = self.test_data[['sum']].values
         # run prediction on test data
         predictions_linear = classifier_linear.predict(x_test)
         predictions_poly = classifier_poly.predict(x_test)
         predictions_rbf = classifier_rbf.predict(x_test)
+        # calculate accuracy for each of the three classifiers
         accuracy_linear = metrics.accuracy_score(y_true=self.test_data['label'], y_pred=predictions_linear)
         accuracy_poly = metrics.accuracy_score(y_true=self.test_data['label'], y_pred=predictions_poly)
         accuracy_rbf = metrics.accuracy_score(y_true=self.test_data['label'], y_pred=predictions_rbf)
+        # check which classifier has the highest accuracy, use this for predictions
         max_accuracy = max([accuracy_linear, accuracy_poly, accuracy_rbf])
         if max_accuracy == accuracy_linear:
             print(f'LINEAR classifier has higher accuracy than poly({accuracy_poly}) or rbf({accuracy_rbf}): {accuracy_linear}')

@@ -1,5 +1,5 @@
 '''
-This module recognizes activities# this program recognizes activities
+This module recognizes activities
 '''
 
 from typing import Dict
@@ -18,6 +18,9 @@ class Recognizer:
         self.kernel /= np.sum(self.kernel)
 
     def process_data(self, acc: Dict[str, Dict[str, float]], gyr: Dict[str, Dict[str, float]], grav: Dict[str, Dict[str, float]]):
+        '''
+        Transforms data input to Dict and appends it to data list
+        '''
         dict_row = {}
         dict_row['acc_x'] = acc['x']
         dict_row['acc_y'] = acc['y']
@@ -31,14 +34,19 @@ class Recognizer:
         dict_row['grav_y'] = grav['y']
         dict_row['grav_z'] = grav['z']
 
+        # only use data if it changed in comparison to last
         if not self.last_row or self.last_row != dict_row:
             self.last_row = dict_row.copy()
             self.data_list.append(dict_row.copy())
 
     def predict(self):
+        '''
+        calculate frequency for every sensor
+        sum up frequencies and use this for prediction
+        :return: predicted label (0, 1, 2) for given sensor data
+        '''
         parameters = []
         data = pd.DataFrame(self.data_list)
-        print(data)
 
         for sensor in config.SENSOR_NAMES:
             data[sensor] = np.convolve(data[sensor], self.kernel, 'same')
