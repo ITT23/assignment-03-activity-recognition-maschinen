@@ -1,6 +1,6 @@
-'''
+"""
 This module gathers sensor data and saves it to /data/FILENAME.csv
-'''
+"""
 from DIPPID import SensorUDP
 from typing import Dict
 import config

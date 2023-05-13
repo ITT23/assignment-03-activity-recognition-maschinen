@@ -7,9 +7,6 @@ import config
 import numpy as np
 from scipy import signal
 from sklearn import model_selection, metrics, svm
-import matplotlib
-from matplotlib import pyplot as plt
-import seaborn as sns
 
 
 class Trainer:
@@ -48,7 +45,6 @@ class Trainer:
         """
         calculate frequencies for each sensor data and store it in a central dataframe
         :param dataframe: gathered and split dataset for one activity (~3 seconds)
-        :return:
         """
         # determine exact sample length
         sample_length = round(dataframe['timestamp'].max() - dataframe['timestamp'].min(), 4)
@@ -67,108 +63,67 @@ class Trainer:
             lambda x: np.convolve(x, kernel, 'same'), raw=True)
 
         row = {}
-        sum_sensors = 0
-        #sum_sensor_frequencies = 0
-        #sum_sensor_amplitudes = 0
-        #sensor_amplitudes = []
+        sum_frequencies = 0
+        amplitude_acc_y = gaussian_df['acc_y'].max() - gaussian_df['acc_y'].min()
         # calculate frequency for each sensor
         for sensor in config.SENSOR_NAMES:
             spectrum = np.abs(np.fft.fft(gaussian_df[sensor]))
-            # calculate amplitude
-            #amplitudes = (2 / (sample_length * config.SAMPLING_RATE)) * np.abs(spectrum)
-            #amplitude = np.mean(amplitudes)
-            #row[sensor+'_ampl'] = amplitude
-            #sum_sensor_amplitudes += amplitude
-            #sensor_amplitudes.append(amplitude)
             # calculate frequency
             frequencies = np.fft.fftfreq(len(gaussian_df[sensor]), 1 / config.SAMPLING_RATE)
             mask = frequencies > 0
             frequency = np.argmax(spectrum[mask] * config.SAMPLING_RATE) / sample_length
             row[sensor] = frequency
-            #sum_sensor_frequencies += frequency
+            sum_frequencies += frequency
         row['label'] = gaussian_df['label'].values[1]
-        row['sum'] = sum_sensors
-        #row['sum_freq'] = sum_sensor_frequencies
-        #row['sum_ampl'] = sum_sensor_amplitudes
-        #mean_sensor_amplitudes = sum(sensor_amplitudes) / len(sensor_amplitudes)
-        #row['sum_ampl'] = mean_sensor_amplitudes
+        row['sum'] = sum_frequencies
+        row['amplitude_acc_y'] = amplitude_acc_y
         self.train_data_list.append(row)
 
     def split_train_test(self):
         """
         split training data into test and train to evaluate classifier
         """
-        #todo check if gleichmäßiger split
-        self.train_data, self.test_data = model_selection.train_test_split(self.train_data)
-        #self.test_data = self.train_data.copy()
+        self.train_data, self.test_data = model_selection.train_test_split(self.train_data, test_size=0.1, train_size=0.9)
 
     def fit_classifier(self):
         """
-        fit lienar, poly and rbf classifiers with frequency sums of training data
+        fit linear and poly classifiers with frequency sums of training data
         :return: trained classifiers
         """
         print("fit classifier on train data...")
         classifier_linear = svm.SVC(kernel='linear')
         classifier_poly = svm.SVC(kernel='poly')
-        classifier_rbf = svm.SVC(kernel='rbf')
-        # train all three classifiers
-        x_train = self.train_data[['sum']]
-        #x_train = self.train_data[config.SENSOR_NAMES_W_AMPL].values
-        #x_train = self.train_data[['sum_freq']].values
-        #y_train = self.train_data[['label']].values
-        #x_train = self.train_data[['sum_freq', 'sum_ampl']].values
-        #for index, row in self.train_data.iterrows():
-        #    print(row['label'], row['sum_freq'])
-            #print(self.train_data['label'], x_train[index])
-        #print(self.train_data['label'])
-        #classifier_linear.fit(x_train, y_train)
-        #classifier_poly.fit(x_train, y_train)
-        #classifier_rbf.fit(x_train, y_train)
+        # train linear and poly classifiers
+        x_train = self.train_data[['sum', 'amplitude_acc_y']]
         classifier_linear.fit(x_train, self.train_data['label'])
         classifier_poly.fit(x_train, self.train_data['label'])
-        classifier_rbf.fit(x_train, self.train_data['label'])
-        return classifier_linear, classifier_poly, classifier_rbf
+        return classifier_linear, classifier_poly
 
-    def evaluate(self, classifier_linear, classifier_poly, classifier_rbf):
+    def evaluate(self, classifier_linear, classifier_poly):
         """
         evaluate linear, poly and rbf classifiers
         :param classifier_linear: trained linear classifier
         :param classifier_poly: trained poly classifier
-        :param classifier_rbf: trained rbf classifier
         """
-        #x_test = self.test_data[config.SENSOR_NAMES_W_AMPL].values
-        x_test = self.test_data[['sum']]
-        #y_test = self.test_data[['label']].values
-        #x_test = self.test_data[['sum_freq', 'sum_ampl']].values
+        x_test = self.test_data[['sum', 'amplitude_acc_y']]
         # run prediction on test data
         predictions_linear = classifier_linear.predict(x_test)
         predictions_poly = classifier_poly.predict(x_test)
-        predictions_rbf = classifier_rbf.predict(x_test)
-        # calculate accuracy for each of the three classifiers
-        #accuracy_linear = metrics.accuracy_score(y_true=y_test, y_pred=predictions_linear)
-        #accuracy_poly = metrics.accuracy_score(y_true=y_test, y_pred=predictions_poly)
-        #accuracy_rbf = metrics.accuracy_score(y_true=y_test, y_pred=predictions_rbf)
+        # calculate accuracy for linear and poly classifiers
         accuracy_linear = metrics.accuracy_score(y_true=self.test_data['label'], y_pred=predictions_linear)
         accuracy_poly = metrics.accuracy_score(y_true=self.test_data['label'], y_pred=predictions_poly)
-        accuracy_rbf = metrics.accuracy_score(y_true=self.test_data['label'], y_pred=predictions_rbf)
         # check which classifier has the highest accuracy, use this for predictions
-        max_accuracy = max([accuracy_linear, accuracy_poly, accuracy_rbf])
+        max_accuracy = max([accuracy_linear, accuracy_poly])
         if max_accuracy == accuracy_linear:
-            print(f'LINEAR classifier has higher accuracy than poly({accuracy_poly}) or rbf({accuracy_rbf}): {accuracy_linear}')
+            print(f'LINEAR classifier has higher accuracy than poly({accuracy_poly})): {accuracy_linear}')
             self.classifier = classifier_linear
         elif max_accuracy == accuracy_poly:
-            print(f'POLY classifier has higher accuracy than linear({accuracy_linear}) or rbf({accuracy_rbf}): {accuracy_poly}')
+            print(f'POLY classifier has higher accuracy than linear({accuracy_linear})): {accuracy_poly}')
             self.classifier = classifier_poly
-        elif max_accuracy == accuracy_rbf:
-            print(f'RBF classifier has higher accuracy than poly({accuracy_poly}) or linear({accuracy_linear}): {accuracy_rbf}')
-            self.classifier = classifier_rbf
 
     def train(self):
         self.read_data()
         self.split_train_test()
-        classifier_linear, classifier_poly, classifier_rbf = self.fit_classifier()
-        self.evaluate(classifier_linear, classifier_poly, classifier_rbf)
-        #for index, row in self.train_data.iterrows():
-        #    print(row['label'], row['sum_freq'], row['sum_ampl'])
-        #print(self.train_data)
+        classifier_linear, classifier_poly = self.fit_classifier()
+        self.evaluate(classifier_linear, classifier_poly)
         print("training done")

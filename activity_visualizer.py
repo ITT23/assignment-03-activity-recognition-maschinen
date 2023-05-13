@@ -1,6 +1,6 @@
-'''
+"""
 This module visualizes activity predictions
-'''
+"""
 import os
 import pyglet
 import config
@@ -21,7 +21,7 @@ class Visualizer:
         self.visualization_sprite = pyglet.sprite.Sprite(img=self.lying_img)
         self.counter = 0
 
-    def handle_prediction(self, prediction):
+    def handle_prediction(self, prediction: int):
         """
         show image matching to performed/predicted activity
         :param prediction: predicted label (0, 1, 2)

@@ -6,7 +6,6 @@ from enum import Enum
 
 DATAPATH = 'data/'
 SENSOR_NAMES = ['acc_x', 'acc_y', 'acc_z', 'gyr_x', 'gyr_y', 'gyr_z', 'grav_x', 'grav_y', 'grav_z']
-SENSOR_NAMES_W_AMPL = ['acc_x', 'acc_y', 'acc_z', 'gyr_x', 'gyr_y', 'gyr_z', 'grav_x', 'grav_y', 'grav_z', 'acc_x_ampl', 'acc_y_ampl', 'acc_z_ampl', 'gyr_x_ampl', 'gyr_y_ampl', 'gyr_z_ampl', 'grav_x_ampl', 'grav_y_ampl', 'grav_z_ampl']
 
 WINDOW_WIDTH = 900
 WINDOW_HEIGHT = 900
@@ -36,7 +35,7 @@ THRESHOLD = 0.05
 SAMPLING_RATE_INPUT = 60
 
 # initiate prediction every 1.5 seconds
-SAMPLING_LENGTH_INPUT = 3
+SAMPLING_LENGTH_INPUT = 1.5
 
 
 
