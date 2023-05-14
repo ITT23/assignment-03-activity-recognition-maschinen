@@ -1,10 +1,11 @@
 """
 This module visualizes activity predictions
 """
-import os
-import pyglet
-import config
 from typing import Dict
+
+import pyglet
+
+import config
 from activity_recognizer import Recognizer
 
 # img source question: https://www.pngegg.com/en/png-baaoe
@@ -16,10 +17,10 @@ from activity_recognizer import Recognizer
 class Visualizer:
     def __init__(self, classifier):
         self.recognizer = Recognizer(classifier)
-        self.question_img = pyglet.resource.image(os.path.normpath('assets/question.png'))
-        self.waving_img = pyglet.resource.image(os.path.normpath('assets/waving.png'))
-        self.lying_img = pyglet.resource.image(os.path.normpath('assets/lying.png'))
-        self.shaking_img = pyglet.resource.image(os.path.normpath('assets/shaking.png'))
+        self.question_img = pyglet.resource.image('assets/question.png')
+        self.waving_img = pyglet.resource.image('assets/waving.png')
+        self.lying_img = pyglet.resource.image('assets/lying.png')
+        self.shaking_img = pyglet.resource.image('assets/shaking.png')
         self.visualization_sprite = pyglet.sprite.Sprite(img=self.question_img)
         self.visualization_sprite.scale = 0.5
         self.counter = 0

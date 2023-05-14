@@ -2,11 +2,13 @@
 this module trains and evaluates classifiers on gathered data
 """
 import os
-import pandas as pd
-import config
+
 import numpy as np
+import pandas as pd
 from scipy import signal
-from sklearn import model_selection, metrics, svm
+from sklearn import metrics, model_selection, svm
+
+import config
 
 
 class Trainer:
@@ -51,15 +53,17 @@ class Trainer:
 
         # filter out very small values
         filtered_df = dataframe.copy()
-        filtered_df[['acc_x', 'acc_y', 'acc_z', 'gyr_x', 'gyr_y', 'gyr_z', 'grav_x', 'grav_y', 'grav_z']] = filtered_df[
-            ['acc_x', 'acc_y', 'acc_z', 'gyr_x', 'gyr_y', 'gyr_z', 'grav_x', 'grav_y', 'grav_z']].clip(lower=config.THRESHOLD)
+        filtered_df[config.SENSOR_NAMES] = filtered_df[config.SENSOR_NAMES].clip(lower=config.THRESHOLD)
+
+        # normalize values
+        normalized_df = filtered_df.copy()
+        normalized_df[config.SENSOR_NAMES] = normalized_df[config.SENSOR_NAMES].transform(lambda x: x/np.max(np.abs(x), axis=0))
 
         # gaussian clean data
         kernel = signal.gaussian(10, 3)
         kernel /= np.sum(kernel)
-        gaussian_df = filtered_df.copy()
-        gaussian_df[['acc_x', 'acc_y', 'acc_z', 'gyr_x', 'gyr_y', 'gyr_z', 'grav_x', 'grav_y', 'grav_z']] = gaussian_df[
-            ['acc_x', 'acc_y', 'acc_z', 'gyr_x', 'gyr_y', 'gyr_z', 'grav_x', 'grav_y', 'grav_z']].transform(
+        gaussian_df = normalized_df.copy()
+        gaussian_df[config.SENSOR_NAMES] = gaussian_df[config.SENSOR_NAMES].transform(
             lambda x: np.convolve(x, kernel, 'same'), raw=True)
 
         row = {}

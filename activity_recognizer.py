@@ -3,10 +3,12 @@ This module recognizes activities
 """
 
 from typing import Dict
-import config
-from scipy import signal
+
 import numpy as np
 import pandas as pd
+from scipy import signal
+
+import config
 
 
 class Recognizer:

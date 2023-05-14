@@ -1,5 +1,10 @@
-import pyglet
+''''
+This module is the entry point for runnung the program
+'''
 import sys
+
+import pyglet
+
 import config
 from activity_visualizer import Visualizer
 from DIPPID import SensorUDP
@@ -11,13 +16,11 @@ trainer.train()
 sensor = SensorUDP(config.PORT)
 window = pyglet.window.Window(width=config.WINDOW_WIDTH, height=config.WINDOW_HEIGHT)
 pyglet.gl.glClearColor(config.BACKGROUND_COLOR_R, config.BACKGROUND_COLOR_G, config.BACKGROUND_COLOR_B, config.BACKGROUND_COLOR_T)
-# fps_display = pyglet.window.FPSDisplay(window=window)
 
 
 @window.event
 def on_draw():
     window.clear()
-    # fps_display.draw()
     if sensor.get_capabilities():
         if sensor.has_capability('accelerometer'):
             accelerometer_data = sensor.get_value('accelerometer')
